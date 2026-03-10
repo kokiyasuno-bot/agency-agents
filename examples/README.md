@@ -39,6 +39,18 @@ These examples answer the question: *"What does it actually look like when the f
 
 **Key takeaway:** All 8 agents ran in parallel and produced coherent, cross-referencing plans without coordination overhead. The output demonstrates the agency's ability to go from "find an opportunity" to "here's the full blueprint" in a single session.
 
+
+### [memo-photo-search-app.jsx](./memo-photo-search-app.jsx)
+
+**What:** A ready-to-use JSX memo board component with searchable notes, photo attachments, and a clean two-panel layout.
+
+**The scenario:** Useful for quickly bootstrapping an internal memo tool where users can:
+
+- Create memo cards with title/body
+- Attach multiple photos per memo
+- Search memos instantly by title/content
+- Browse results in a responsive, card-based layout
+
 ## Adding New Examples
 
 If you run an interesting multi-agent exercise, consider adding it here. Good examples show:
