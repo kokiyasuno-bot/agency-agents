@@ -39,6 +39,17 @@ These examples answer the question: *"What does it actually look like when the f
 
 **Key takeaway:** All 8 agents ran in parallel and produced coherent, cross-referencing plans without coordination overhead. The output demonstrates the agency's ability to go from "find an opportunity" to "here's the full blueprint" in a single session.
 
+
+### [memory-iteration-game.html](./memory-iteration-game.html)
+
+**What:** A lightweight browser game that repeatedly tests short-term memory by showing a number sequence, hiding it, and asking the user to reproduce it.
+
+**How it works:**
+- Start at level 1 with a 3-digit sequence
+- Enter the sequence after it is hidden
+- Each correct answer increases level and sequence length
+- A miss shows the correct answer and resets to level 1
+
 ## Adding New Examples
 
 If you run an interesting multi-agent exercise, consider adding it here. Good examples show:
