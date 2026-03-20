@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>反復メモリーチャレンジ</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #111827;
+        --surface: #1f2937;
+        --accent: #60a5fa;
+        --ok: #34d399;
+        --ng: #f87171;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, #1e293b, var(--bg));
+        font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+        color: #f8fafc;
+      }
+
+      .card {
+        width: min(640px, 92vw);
+        border-radius: 16px;
+        background: color-mix(in oklab, var(--surface), black 15%);
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: clamp(1.4rem, 2.6vw, 2rem);
+      }
+
+      p {
+        line-height: 1.6;
+      }
+
+      .panel {
+        margin-top: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .sequence {
+        min-height: 56px;
+        display: grid;
+        place-items: center;
+        font-size: clamp(1.6rem, 6vw, 3rem);
+        font-weight: 700;
+        letter-spacing: 0.3rem;
+      }
+
+      .hint {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      input,
+      button {
+        border-radius: 10px;
+        border: 0;
+        padding: 10px 12px;
+        font-size: 1rem;
+      }
+
+      input {
+        flex: 1;
+        min-width: 220px;
+      }
+
+      button {
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #0f172a;
+      }
+
+      button.secondary {
+        background: #374151;
+        color: #e2e8f0;
+      }
+
+      .status {
+        margin-top: 12px;
+        font-weight: 700;
+      }
+
+      .good {
+        color: var(--ok);
+      }
+
+      .bad {
+        color: var(--ng);
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>反復メモリーチャレンジ</h1>
+      <p>表示された数字列を覚えて、同じ順番で入力してください。正解すると1桁ずつ長くなります。</p>
+
+      <section class="panel">
+        <div>レベル: <strong id="level">1</strong></div>
+        <div class="sequence" id="sequence">スタートを押す</div>
+        <div class="hint">表示中は入力できません。消えたら入力してください。</div>
+      </section>
+
+      <div class="row">
+        <input id="answer" type="text" inputmode="numeric" autocomplete="off" placeholder="例: 4931" disabled />
+        <button id="submit" class="primary" disabled>回答する</button>
+      </div>
+      <div class="row">
+        <button id="start" class="primary">スタート</button>
+        <button id="restart" class="secondary">最初から</button>
+      </div>
+
+      <div class="status hidden" id="status" aria-live="polite"></div>
+    </main>
+
+    <script>
+      const levelEl = document.getElementById("level");
+      const sequenceEl = document.getElementById("sequence");
+      const answerEl = document.getElementById("answer");
+      const submitBtn = document.getElementById("submit");
+      const startBtn = document.getElementById("start");
+      const restartBtn = document.getElementById("restart");
+      const statusEl = document.getElementById("status");
+
+      let level = 1;
+      let sequence = "";
+      let showing = false;
+
+      function generateSequence(length) {
+        let text = "";
+        for (let i = 0; i < length; i += 1) {
+          text += Math.floor(Math.random() * 10).toString();
+        }
+        return text;
+      }
+
+      function setStatus(message, type = "") {
+        statusEl.classList.remove("hidden", "good", "bad");
+        statusEl.textContent = message;
+        if (type) {
+          statusEl.classList.add(type);
+        }
+      }
+
+      function clearStatus() {
+        statusEl.className = "status hidden";
+        statusEl.textContent = "";
+      }
+
+      function lockInput() {
+        answerEl.disabled = true;
+        submitBtn.disabled = true;
+      }
+
+      function unlockInput() {
+        answerEl.disabled = false;
+        submitBtn.disabled = false;
+        answerEl.focus();
+      }
+
+      async function startRound() {
+        clearStatus();
+        levelEl.textContent = level;
+        sequence = generateSequence(level + 2);
+        showing = true;
+        lockInput();
+        answerEl.value = "";
+
+        sequenceEl.textContent = sequence;
+        await new Promise((resolve) => setTimeout(resolve, Math.min(4200, 900 + level * 350)));
+        sequenceEl.textContent = "● ● ●";
+        showing = false;
+        unlockInput();
+      }
+
+      function resetGame() {
+        level = 1;
+        sequence = "";
+        showing = false;
+        levelEl.textContent = level;
+        sequenceEl.textContent = "スタートを押す";
+        answerEl.value = "";
+        lockInput();
+        clearStatus();
+      }
+
+      function submitAnswer() {
+        if (showing) {
+          return;
+        }
+
+        if (answerEl.value.trim() === sequence) {
+          setStatus("正解！次のレベルへ。", "good");
+          level += 1;
+          startRound();
+        } else {
+          setStatus(`不正解。正解は ${sequence} でした。レベル1に戻ります。`, "bad");
+          level = 1;
+          sequence = "";
+          sequenceEl.textContent = "スタートを押して再挑戦";
+          lockInput();
+        }
+      }
+
+      submitBtn.addEventListener("click", submitAnswer);
+      answerEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          submitAnswer();
+        }
+      });
+
+      startBtn.addEventListener("click", startRound);
+      restartBtn.addEventListener("click", resetGame);
+
+      resetGame();
+    </script>
+  </body>
+</html>
